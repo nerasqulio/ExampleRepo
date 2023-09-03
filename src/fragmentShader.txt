@@ -1,0 +1,40 @@
+#version 450
+
+in vec2 tempTextureCoordinates;
+in vec3 surfaceNormal;
+in vec3 toLightSource;
+//-----------------
+in vec3 toViewSource;
+
+out vec4 outColor;
+
+
+uniform vec3 lightColor;
+uniform float shineFactor;
+uniform float reflectivity;
+uniform sampler2D textureSampler;
+uniform sampler2D textureSampler2;
+
+void main(void)
+{
+   vec3 unitNormal = normalize(surfaceNormal);
+   vec3 unitLightVector = normalize(toLightSource);
+   
+   //---------------------- 
+  vec3 normalView = normalize(toViewSource);
+  vec3 anotherVec = -unitLightVector;
+  vec3 reflectedLightDirection = reflect(anotherVec,unitNormal);
+  
+   
+   
+    
+   //---------------------------
+  float dotP = dot(unitNormal, unitLightVector);
+  float dotR = dot(reflectedLightDirection ,normalView);
+  dotR = max(dotR,0.0);
+  float shining = pow(dotR,shineFactor);
+   vec3 specularLight = shining * reflectivity * lightColor;
+   float brightness = max(dotP,0.4);
+   vec3 lightResult = brightness * lightColor;
+   outColor = vec4(lightResult,1.0) * (texture(textureSampler,tempTextureCoordinates)+texture(textureSampler2,tempTextureCoordinates)) + vec4(specularLight,1.0);
+}

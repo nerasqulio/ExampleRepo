@@ -1,0 +1,40 @@
+#version 400 core
+
+
+
+
+in vec3 position;
+in vec3 normal;
+in vec2 textureCoordinates;
+
+out vec2 tempTextureCoordinates;
+out vec3 surfaceNormal;
+out vec3 toLightSource;
+out vec3 toViewSource;
+
+
+
+uniform dmat4 duble;
+uniform mat4 viewMatrix;
+uniform mat4 Matrix;
+uniform mat4 projectionMatrix;
+uniform vec3 lightPos;
+uniform float angle;
+
+
+
+void main(void)
+{
+	
+	
+	vec3 normCenter = cross(vec3(0,0,-1),vec3(0,1,0));	
+	vec3 worldPos = (1 - cos(angle)) * dot(normCenter,position) * normCenter + cos(angle) * position - sin(angle) * cross(normCenter,position);	
+	vec4 newWorld = Matrix * vec4(worldPos,1.0);
+	gl_Position = projectionMatrix * viewMatrix *  newWorld;
+	tempTextureCoordinates = textureCoordinates;	
+	vec3 anotherMat = (1 - cos(angle)) * dot(normCenter,normal) * normCenter + cos(angle) * normal - sin(angle) * cross(normCenter,normal);
+	surfaceNormal = (Matrix * vec4(anotherMat,0.0)).xyz;
+	toLightSource = lightPos - newWorld.xyz;	
+	toViewSource = (inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - newWorld.xyz;
+
+}
